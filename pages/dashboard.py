@@ -10,11 +10,29 @@ from PIL import Image
 
 from utils import get_classification_history, get_stats_by_category, get_stats_over_time
 
+# Page configuration must be the first Streamlit command
 st.set_page_config(
     page_title="Dashboard - Waste Classification System",
     page_icon="♻️",
-    layout="wide"
+    layout="wide",
+    menu_items={
+        'Get Help': None,
+        'Report a bug': None,
+        'About': None
+    }
 )
+
+# Hide deploy button and other UI elements
+st.markdown("""
+    <style>
+        .stDeployButton {display: none !important;}
+        #MainMenu {visibility: hidden !important;}
+        header {visibility: hidden !important;}
+        footer {visibility: hidden !important;}
+        .viewerBadge_container__1QSob {display: none !important;}
+        div[data-testid="stToolbar"] {display: none !important;}
+    </style>
+""", unsafe_allow_html=True)
 
 # Load custom CSS
 def load_css():
@@ -442,10 +460,10 @@ else:
     st.info("No classification data available yet. Start classifying waste images to build your dashboard!")
 
 # Footer with styled design
-st.markdown('</div>', unsafe_allow_html=True)  # Close the last container
+# st.markdown('</div>', unsafe_allow_html=True)  # Close the last container
 
-st.markdown('<footer class="footer">', unsafe_allow_html=True)
-st.markdown('<div style="display: flex; justify-content: center; align-items: center; padding: 20px;">', unsafe_allow_html=True)
-st.markdown('<span style="font-size: 1.2em; margin-right: 10px;">♻️</span> <span style="font-weight: bold; color: #2E7D32;">Waste Classification System</span> <span style="margin-left: 10px; color: #666;">Powered by AI</span>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('</footer>', unsafe_allow_html=True)
+# st.markdown('<footer class="footer">', unsafe_allow_html=True)
+# st.markdown('<div style="display: flex; justify-content: center; align-items: center; padding: 20px;">', unsafe_allow_html=True)
+# st.markdown('<span style="font-size: 1.2em; margin-right: 10px;">♻️</span> <span style="font-weight: bold; color: #2E7D32;">Waste Classification System</span> <span style="margin-left: 10px; color: #666;">Powered by AI</span>', unsafe_allow_html=True)
+# st.markdown('</div>', unsafe_allow_html=True)
+# st.markdown('</footer>', unsafe_allow_html=True)
