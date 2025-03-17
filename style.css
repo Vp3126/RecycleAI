@@ -103,6 +103,21 @@ h1, h2, h3 {
     margin-bottom: 2rem;
 }
 
+/* Info card styling for About page */
+.info-card {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.info-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
 /* File uploader styling */
 div[data-testid="stFileUploader"] {
     background-color: #f8f9fa;
