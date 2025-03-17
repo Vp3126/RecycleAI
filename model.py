@@ -1,4 +1,6 @@
+import tensorflow as tf
 import numpy as np
+import os
 from PIL import Image
 import io
 import random
@@ -12,6 +14,16 @@ WASTE_CATEGORIES = [
     "organic", 
     "e-waste"
 ]
+
+# Define the model path
+MODEL_PATH = os.path.join(os.path.dirname(__file__), 'model', 'waste_classifier.h5')
+
+# Load the model once at startup
+try:
+    model = tf.keras.models.load_model(MODEL_PATH)
+except Exception as e:
+    print(f"Error loading model: {e}")
+    model = None
 
 class SimpleClassifier:
     """
@@ -69,48 +81,46 @@ def load_model():
     return model
 
 def preprocess_image(image):
-    """
-    Preprocess the image to match the model's expected input
-    
-    Args:
-        image: PIL Image or file path
-    
-    Returns:
-        Preprocessed image as numpy array
-    """
-    # Resize to expected dimensions
-    if isinstance(image, str):
-        image = Image.open(image)
-    
-    image = image.resize((224, 224))
-    
-    # Convert to numpy array and normalize
-    img_array = np.array(image) / 255.0
-    
-    # Add batch dimension
-    img_array = np.expand_dims(img_array, axis=0)
-    
-    return img_array
+    """Preprocess the image for model input."""
+    try:
+        # Convert to RGB if needed
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        
+        # Resize image
+        image = image.resize((224, 224))
+        
+        # Convert to array and preprocess
+        img_array = np.array(image)
+        img_array = img_array / 255.0  # Normalize
+        img_array = np.expand_dims(img_array, axis=0)
+        
+        return img_array
+    except Exception as e:
+        print(f"Error preprocessing image: {e}")
+        return None
 
-def predict_waste_class(model, image_array):
-    """
-    Predict waste class from image array
-    
-    Args:
-        model: SimpleClassifier instance
-        image_array: Preprocessed image as numpy array
-    
-    Returns:
-        Tuple of (predicted_class, confidence)
-    """
-    # Get model prediction
-    predictions = model.predict(image_array)
-    
-    # Get the index of the highest probability
-    predicted_index = np.argmax(predictions)
-    
-    # Get the class name and confidence
-    predicted_class = WASTE_CATEGORIES[predicted_index]
-    confidence = predictions[predicted_index] * 100
-    
-    return predicted_class, confidence
+def predict_waste(image):
+    """Predict waste category from image."""
+    try:
+        if model is None:
+            return None, "Error: Model not loaded"
+            
+        # Preprocess image
+        processed_image = preprocess_image(image)
+        if processed_image is None:
+            return None, "Error: Image preprocessing failed"
+        
+        # Make prediction
+        prediction = model.predict(processed_image)
+        predicted_class = np.argmax(prediction[0])
+        confidence = float(prediction[0][predicted_class])
+        
+        # Map class index to category
+        categories = ['plastic', 'glass', 'metal', 'paper', 'organic', 'e-waste']
+        category = categories[predicted_class]
+        
+        return category, confidence
+    except Exception as e:
+        print(f"Error in prediction: {e}")
+        return None, "Error: Prediction failed"
