@@ -29,7 +29,32 @@ st.markdown('''
 ''', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
-# Create tabs for different waste categories
+# Create styled container for tabs
+st.markdown('<div class="main-container" style="margin-top: 20px;">', unsafe_allow_html=True)
+st.markdown('<h2 style="color: #2E7D32; border-bottom: 2px solid #4CAF50; padding-bottom: 8px;">🔍 Explore Waste Categories</h2>', unsafe_allow_html=True)
+
+# Create tabs for different waste categories with custom styling
+st.markdown('''
+<style>
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 2px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background-color: #f8f9fa;
+        border-radius: 4px 4px 0 0;
+        border-left: 1px solid #eee;
+        border-right: 1px solid #eee;
+        border-top: 1px solid #eee;
+        padding: 10px 16px;
+        height: 45px;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #4CAF50 !important;
+        color: white !important;
+    }
+</style>
+''', unsafe_allow_html=True)
+
 tabs = st.tabs(list(waste_categories.keys()))
 
 # Fill each tab with educational content
@@ -173,10 +198,11 @@ for i, (category, info) in enumerate(waste_categories.items()):
                 - Reduces need for destructive mining practices
                 """)
 
-# Add section on general recycling best practices
-st.markdown("---")
-st.header("General Recycling Best Practices")
+# New container for best practices section
+st.markdown('<div class="main-container" style="margin-top: 30px; margin-bottom: 20px;">', unsafe_allow_html=True)
+st.markdown('<h2 style="color: #2E7D32; border-bottom: 2px solid #4CAF50; padding-bottom: 8px; margin-bottom: 20px;">🌍 General Recycling Best Practices</h2>', unsafe_allow_html=True)
 
+# Two styled columns
 col1, col2 = st.columns([1, 1])
 
 with col1:
@@ -226,5 +252,12 @@ with col2:
     Following this hierarchy maximizes environmental benefits.
     """)
 
-st.markdown("---")
-st.markdown("♻️ Waste Classification System - Powered by AI")
+# Close the last container div
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Footer with styled design
+st.markdown('<footer class="footer">', unsafe_allow_html=True)
+st.markdown('<div style="display: flex; justify-content: center; align-items: center; padding: 20px;">', unsafe_allow_html=True)
+st.markdown('<span style="font-size: 1.2em; margin-right: 10px;">♻️</span> <span style="font-weight: bold; color: #2E7D32;">Waste Classification System</span> <span style="margin-left: 10px; color: #666;">Powered by AI</span>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</footer>', unsafe_allow_html=True)
