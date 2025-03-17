@@ -15,45 +15,46 @@ def ensure_directory(directory):
 # Create data directory
 ensure_directory("data")
 
+HISTORY_FILE = "classification_history.json"
+
 def save_classification_history(entry):
-    """
-    Save classification history to a JSON file
-    
-    Args:
-        entry: Dictionary containing classification details
-    """
-    history_file = "data/classification_history.csv"
-    
-    # Convert image to base64 to save as string
-    if "image" in entry:
-        image_bytes = entry["image"]
-        del entry["image"]  # Remove actual bytes before saving
+    """Save a classification entry to history file"""
+    try:
+        # Convert image bytes to base64 string
+        if "image" in entry:
+            entry["image"] = base64.b64encode(entry["image"]).decode('utf-8')
         
-    # Create DataFrame from entry
-    df_entry = pd.DataFrame([entry])
-    
-    # Append to CSV or create new file
-    if os.path.exists(history_file):
-        df_entry.to_csv(history_file, mode='a', header=False, index=False)
-    else:
-        df_entry.to_csv(history_file, index=False)
-    
-    return True
+        # Load existing history
+        history = get_classification_history()
+        
+        # Add new entry
+        history.append(entry)
+        
+        # Keep only last 10 entries
+        history = history[-10:]
+        
+        # Save to file
+        with open(HISTORY_FILE, 'w') as f:
+            json.dump(history, f, indent=2)
+            
+    except Exception as e:
+        print(f"Error saving history: {str(e)}")
 
 def get_classification_history():
-    """
-    Get classification history from saved JSON file
-    
-    Returns:
-        List of classification history entries
-    """
-    history_file = "data/classification_history.csv"
-    
-    if os.path.exists(history_file):
-        history_df = pd.read_csv(history_file)
-        return history_df.to_dict('records')
-    
-    return []
+    """Load classification history from file"""
+    try:
+        if os.path.exists(HISTORY_FILE):
+            with open(HISTORY_FILE, 'r') as f:
+                history = json.load(f)
+                # Convert base64 strings back to bytes for display
+                for entry in history:
+                    if "image" in entry:
+                        entry["image"] = base64.b64decode(entry["image"])
+                return history
+        return []
+    except Exception as e:
+        print(f"Error loading history: {str(e)}")
+        return []
 
 def get_stats_by_category():
     """
