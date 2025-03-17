@@ -37,9 +37,9 @@ if 'selected_category' not in st.session_state:
     st.session_state.selected_category = None
 
 # Get query parameters
-query_params = st.experimental_get_query_params()
+query_params = st.query_params
 if 'category' in query_params:
-    st.session_state.selected_category = query_params['category'][0]
+    st.session_state.selected_category = query_params['category']
 
 # App title
 st.title("♻️ Waste Classification System")
@@ -136,7 +136,9 @@ if st.session_state.selected_category and st.session_state.selected_category in 
         st.markdown('<div style="display: flex; justify-content: center; margin: 20px 0;">', unsafe_allow_html=True)
         if st.button("🔙 Back to Home"):
             st.session_state.selected_category = None
-            st.experimental_set_query_params()
+            # Clear query parameters
+            for param in st.query_params:
+                del st.query_params[param]
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
