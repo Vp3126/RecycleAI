@@ -84,17 +84,17 @@ nav_html = """
         <span>🏠 Home</span>
     </div>
 </a>
-<a href="/Dashboard" class="sidebar-category-link">
+<a href="/dashboard" class="sidebar-category-link">
     <div class="sidebar-category">
         <span>📊 Dashboard</span>
     </div>
 </a>
-<a href="/Education" class="sidebar-category-link">
+<a href="/education" class="sidebar-category-link">
     <div class="sidebar-category">
         <span>📚 Education</span>
     </div>
 </a>
-<a href="/About" class="sidebar-category-link">
+<a href="/about" class="sidebar-category-link">
     <div class="sidebar-category">
         <span>ℹ️ About</span>
     </div>
