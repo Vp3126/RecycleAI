@@ -200,8 +200,8 @@ if st.session_state.history:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # Footer
-st.markdown('<footer class="footer">', unsafe_allow_html=True)
-st.markdown('<div style="display: flex; justify-content: center; align-items: center; padding: 20px;">', unsafe_allow_html=True)
-st.markdown('<span style="font-size: 1.2em; margin-right: 10px;">♻️</span> <span style="font-weight: bold; color: #2E7D32;">Waste Classification System</span> <span style="margin-left: 10px; color: #666;">Powered by AI</span>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('</footer>', unsafe_allow_html=True)
+# st.markdown('<footer class="footer">', unsafe_allow_html=True)
+# st.markdown('<div style="display: flex; justify-content: center; align-items: center; padding: 20px;">', unsafe_allow_html=True)
+# st.markdown('<span style="font-size: 1.2em; margin-right: 10px;">♻️</span> <span style="font-weight: bold; color: #2E7D32;">Waste Classification System</span> <span style="margin-left: 10px; color: #666;">Powered by AI</span>', unsafe_allow_html=True)
+# st.markdown('</div>', unsafe_allow_html=True)
+# st.markdown('</footer>', unsafe_allow_html=True)

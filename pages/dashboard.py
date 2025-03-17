@@ -191,19 +191,252 @@ if history:
         # Create a dataframe from the history
         df = pd.DataFrame(history)
         
-        # Apply custom styles to the dataframe
-        styled_df = df.style.format({
+        # First sort the original dataframe, then apply styling
+        sorted_df = df.sort_values('timestamp', ascending=False)
+        styled_df = sorted_df.style.format({
             'confidence': '{:.1f}%',
         })
         
         # Display the table with the most recent entries first
         st.dataframe(
-            styled_df.sort_values('timestamp', ascending=False),
+            styled_df,
             use_container_width=True,
             height=300
         )
         
         st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Add new Advanced Analytics section
+        st.markdown('</div>', unsafe_allow_html=True)  # Close previous container
+        
+        st.markdown('<div class="main-container" style="margin-top: 20px;">', unsafe_allow_html=True)
+        st.markdown('<h2 style="color: #2E7D32; border-bottom: 2px solid #4CAF50; padding-bottom: 8px;">🔍 Advanced Analytics</h2>', unsafe_allow_html=True)
+        
+        # Create container for advanced analytics
+        st.markdown('<div style="padding: 1rem; background-color: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">', unsafe_allow_html=True)
+        
+        tab1, tab2, tab3 = st.tabs(["Waste Trends", "Environmental Impact", "Recycling Potential"])
+        
+        with tab1:
+            st.markdown('<h3 style="color: #2E7D32; text-align: center; font-size: 1.2rem;">Waste Classification Trends</h3>', unsafe_allow_html=True)
+            
+            # Create a line chart for classification trends over time
+            if not stats_over_time.empty:
+                # Pivot the data to create time series for each category
+                pivot_df = stats_over_time.pivot_table(index='date', columns='category', values='count', fill_value=0)
+                
+                # Plot line chart with plotly
+                fig = px.line(
+                    pivot_df, 
+                    labels={'value': 'Number of Items', 'date': 'Date', 'variable': 'Waste Type'},
+                    color_discrete_sequence=['#4CAF50', '#8BC34A', '#CDDC39', '#FFC107', '#FF9800', '#FF5722']
+                )
+                
+                fig.update_layout(
+                    margin=dict(t=30, b=0, l=0, r=0),
+                    legend_title_text='Waste Category',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    xaxis=dict(
+                        title='',
+                        gridcolor='#eee',
+                    ),
+                    yaxis=dict(
+                        title='Number of Items',
+                        gridcolor='#eee',
+                    ),
+                )
+                
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Add trend analysis text
+                if len(pivot_df) > 1:
+                    st.markdown('<div style="background-color: #f1f8e9; padding: 15px; border-radius: 8px; margin-top: 15px;">', unsafe_allow_html=True)
+                    st.markdown('<h4 style="color: #2E7D32; font-size: 1.1rem; margin-bottom: 10px;">Trend Analysis</h4>', unsafe_allow_html=True)
+                    
+                    # Find most common waste type 
+                    most_common = sorted(stats_by_category, key=lambda x: x['count'], reverse=True)[0]['category']
+                    
+                    st.markdown(f'''
+                    <p style="margin-bottom: 8px;">• <strong>{most_common.title()}</strong> is the most commonly classified waste type.</p>
+                    <p style="margin-bottom: 8px;">• Your waste classification activity is helping track recycling patterns.</p>
+                    <p style="margin-bottom: 8px;">• Continue classifying to build more detailed trends over time.</p>
+                    ''', unsafe_allow_html=True)
+                    st.markdown('</div>', unsafe_allow_html=True)
+            else:
+                st.info("Start classifying waste to see trends over time!")
+                
+        with tab2:
+            st.markdown('<h3 style="color: #2E7D32; text-align: center; font-size: 1.2rem;">Environmental Impact Metrics</h3>', unsafe_allow_html=True)
+            
+            if stats_by_category:
+                # Create two columns for environmental impact
+                impact_col1, impact_col2 = st.columns([1, 1])
+                
+                with impact_col1:
+                    # Create gauge chart for recycling impact score
+                    if len(history) > 0:
+                        # Calculate recycling rate (simplified example)
+                        recyclable_count = 0
+                        for item in stats_by_category:
+                            if item['category'] in ['plastic', 'glass', 'metal', 'paper']:
+                                recyclable_count += item['count']
+                        
+                        total_count = sum(item['count'] for item in stats_by_category)
+                        recycling_rate = (recyclable_count / total_count) * 100 if total_count > 0 else 0
+                        
+                        # Create gauge chart
+                        fig = go.Figure(go.Indicator(
+                            mode = "gauge+number",
+                            value = recycling_rate,
+                            domain = {'x': [0, 1], 'y': [0, 1]},
+                            title = {'text': "Recycling Rate", 'font': {'size': 24, 'color': '#2E7D32'}},
+                            gauge = {
+                                'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "#2E7D32"},
+                                'bar': {'color': "#2E7D32"},
+                                'bgcolor': "white",
+                                'borderwidth': 2,
+                                'bordercolor': "#2E7D32",
+                                'steps': [
+                                    {'range': [0, 30], 'color': '#FFCDD2'},
+                                    {'range': [30, 70], 'color': '#FFF9C4'},
+                                    {'range': [70, 100], 'color': '#C8E6C9'}
+                                ],
+                            }
+                        ))
+                        
+                        fig.update_layout(
+                            height=250,
+                            margin=dict(t=25, b=0, l=25, r=25),
+                            paper_bgcolor='rgba(0,0,0,0)',
+                        )
+                        
+                        st.plotly_chart(fig, use_container_width=True)
+                    
+                with impact_col2:
+                    # Create a custom metric showing CO2 savings (simplified calculation)
+                    if len(history) > 0:
+                        # Example CO2 savings calculation (simplified for illustration)
+                        # In a real app, you would use more accurate values based on waste type
+                        plastic_count = sum(1 for entry in history if entry.get('category') == 'plastic')
+                        glass_count = sum(1 for entry in history if entry.get('category') == 'glass')
+                        metal_count = sum(1 for entry in history if entry.get('category') == 'metal')
+                        paper_count = sum(1 for entry in history if entry.get('category') == 'paper')
+                        
+                        # Example savings factors (kg CO2 per item recycled)
+                        co2_savings = plastic_count * 0.5 + glass_count * 0.3 + metal_count * 1.5 + paper_count * 0.2
+                        trees_saved = paper_count * 0.1  # Example: 10 paper items = 1 tree
+                        
+                        st.markdown(f'''
+                        <div style="background-color: #f1f8e9; padding: 15px; border-radius: 8px; text-align: center; height: 212px; display: flex; flex-direction: column; justify-content: center;">
+                            <h4 style="color: #2E7D32; margin-bottom: 15px;">Estimated Environmental Impact</h4>
+                            <div style="display: flex; justify-content: space-around;">
+                                <div>
+                                    <p style="font-size: 2rem; color: #2E7D32; margin: 0;">{co2_savings:.1f}kg</p>
+                                    <p style="color: #555;">CO₂ Emissions Saved</p>
+                                </div>
+                                <div>
+                                    <p style="font-size: 2rem; color: #2E7D32; margin: 0;">{trees_saved:.1f}</p>
+                                    <p style="color: #555;">Trees Preserved</p>
+                                </div>
+                            </div>
+                        </div>
+                        ''', unsafe_allow_html=True)
+            else:
+                st.info("Start classifying waste to see environmental impact metrics!")
+            
+        with tab3:
+            st.markdown('<h3 style="color: #2E7D32; text-align: center; font-size: 1.2rem;">Recycling Potential Analysis</h3>', unsafe_allow_html=True)
+            
+            if stats_by_category:
+                # Create a more advanced stacked area chart for recycling potential by category
+                if not stats_over_time.empty:
+                    # Group data by recyclability
+                    recyclable_categories = ['plastic', 'glass', 'metal', 'paper']
+                    
+                    # Prepare data for stacked chart
+                    recycling_data = []
+                    
+                    for _, row in stats_over_time.iterrows():
+                        is_recyclable = row['category'] in recyclable_categories
+                        category_type = 'Recyclable' if is_recyclable else 'Non-recyclable'
+                        recycling_data.append({
+                            'date': row['date'],
+                            'count': row['count'],
+                            'category_type': category_type
+                        })
+                    
+                    recycling_df = pd.DataFrame(recycling_data)
+                    recycling_summary = recycling_df.groupby(['date', 'category_type']).sum().reset_index()
+                    
+                    # Create stacked area chart
+                    fig = px.area(
+                        recycling_summary, 
+                        x="date", 
+                        y="count", 
+                        color="category_type",
+                        labels={"count": "Number of Items", "date": "Date", "category_type": "Material Type"},
+                        color_discrete_map={'Recyclable': '#4CAF50', 'Non-recyclable': '#FF5722'}
+                    )
+                    
+                    fig.update_layout(
+                        margin=dict(t=30, b=0, l=0, r=0),
+                        legend_title_text='',
+                        plot_bgcolor='rgba(0,0,0,0)',
+                        paper_bgcolor='rgba(0,0,0,0)',
+                        xaxis=dict(
+                            title='',
+                            gridcolor='#eee',
+                        ),
+                        yaxis=dict(
+                            title='Number of Items',
+                            gridcolor='#eee',
+                        ),
+                    )
+                    
+                    st.plotly_chart(fig, use_container_width=True)
+                    
+                # Recycling opportunity breakdown
+                recyclable_items = 0
+                total_items = 0
+                
+                category_recycling = {}
+                
+                for item in stats_by_category:
+                    category = item['category']
+                    count = item['count']
+                    total_items += count
+                    
+                    if category in ['plastic', 'glass', 'metal', 'paper']:
+                        recyclable_items += count
+                        category_recycling[category] = {
+                            'count': count,
+                            'recyclable': True,
+                            'color': '#4CAF50'
+                        }
+                    else:
+                        category_recycling[category] = {
+                            'count': count,
+                            'recyclable': False,
+                            'color': '#FF5722'
+                        }
+                
+                recycling_pct = (recyclable_items / total_items) * 100 if total_items > 0 else 0
+                
+                # Display recycling opportunity summary
+                st.markdown(f'''
+                <div style="background-color: #f1f8e9; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <h4 style="color: #2E7D32; font-size: 1.1rem; margin-bottom: 10px;">Recycling Opportunity</h4>
+                    <p style="margin-bottom: 10px;">
+                        <span style="font-weight: bold; color: #2E7D32; font-size: 1.1rem;">{recycling_pct:.1f}%</span> 
+                        of your classified waste items are recyclable.
+                    </p>
+                </div>
+                ''', unsafe_allow_html=True)
+            else:
+                st.info("Start classifying waste to analyze recycling potential!")
+            
+        st.markdown('</div>', unsafe_allow_html=True)  # Close the advanced analytics container
     
 else:
     st.info("No classification data available yet. Start classifying waste images to build your dashboard!")
