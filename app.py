@@ -8,7 +8,6 @@ import time
 import matplotlib.pyplot as plt
 from datetime import datetime
 import os
-import tensorflow as tf
 
 from model import load_model, preprocess_image, predict_waste_class
 from utils import save_classification_history, get_classification_history
