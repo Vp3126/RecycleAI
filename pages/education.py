@@ -7,14 +7,27 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("Waste Education Center")
+# Load custom CSS
+def load_css():
+    with open("style.css") as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-st.markdown("""
-# Learn About Waste Types and Recycling
+load_css()
 
-Proper waste sorting and recycling are essential for environmental sustainability. This guide explains different waste types, 
-how to identify them, and best practices for recycling each type.
-""")
+# Styled page title
+st.markdown('<h1 style="color: #2E7D32; border-bottom: 2px solid #4CAF50; padding-bottom: 10px;">📚 Waste Education Center</h1>', unsafe_allow_html=True)
+
+# Main container with styled intro
+st.markdown('<div class="main-container">', unsafe_allow_html=True)
+st.markdown('''
+<h2 style="color: #2E7D32; margin-bottom: 15px;">Learn About Waste Types and Recycling</h2>
+
+<p style="font-size: 1.1rem; line-height: 1.6; color: #333; background-color: #f1f8e9; padding: 15px; border-radius: 10px; border-left: 5px solid #4CAF50;">
+    Proper waste sorting and recycling are essential for environmental sustainability. This guide explains different waste types, 
+    how to identify them, and best practices for recycling each type.
+</p>
+''', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # Create tabs for different waste categories
 tabs = st.tabs(list(waste_categories.keys()))
