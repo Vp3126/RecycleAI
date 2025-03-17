@@ -33,6 +33,13 @@ if 'history' not in st.session_state:
     st.session_state.history = []
 if 'model' not in st.session_state:
     st.session_state.model = None
+if 'selected_category' not in st.session_state:
+    st.session_state.selected_category = None
+
+# Get query parameters
+query_params = st.experimental_get_query_params()
+if 'category' in query_params:
+    st.session_state.selected_category = query_params['category'][0]
 
 # App title
 st.title("♻️ Waste Classification System")
@@ -58,44 +65,92 @@ st.sidebar.markdown("Upload an image of waste to classify it and get recycling g
 st.sidebar.markdown("---")
 st.sidebar.markdown("### Categories")
 
-# Enhanced sidebar categories with hover effect
+# Enhanced sidebar categories with hover effect and links
 for category in waste_categories.keys():
     category_html = f"""
-    <div class="sidebar-category">
-        <span>{category}</span>
-    </div>
+    <a href="?category={category}" class="sidebar-category-link">
+        <div class="sidebar-category">
+            <span>{category}</span>
+        </div>
+    </a>
     """
     st.sidebar.markdown(category_html, unsafe_allow_html=True)
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### Navigation")
 nav_html = """
-<div class="sidebar-category">
-    <span>🏠 Home</span>
-</div>
-<div class="sidebar-category">
-    <span>📊 Dashboard</span>
-</div>
-<div class="sidebar-category">
-    <span>📚 Education</span>
-</div>
-<div class="sidebar-category">
-    <span>ℹ️ About</span>
-</div>
+<a href="/" class="sidebar-category-link">
+    <div class="sidebar-category">
+        <span>🏠 Home</span>
+    </div>
+</a>
+<a href="/Dashboard" class="sidebar-category-link">
+    <div class="sidebar-category">
+        <span>📊 Dashboard</span>
+    </div>
+</a>
+<a href="/Education" class="sidebar-category-link">
+    <div class="sidebar-category">
+        <span>📚 Education</span>
+    </div>
+</a>
+<a href="/About" class="sidebar-category-link">
+    <div class="sidebar-category">
+        <span>ℹ️ About</span>
+    </div>
+</a>
 """
 st.sidebar.markdown(nav_html, unsafe_allow_html=True)
 
 # Main content
 st.markdown('<div class="main-container">', unsafe_allow_html=True)
-col1, col2 = st.columns([1, 1])
 
-with col1:
-    st.markdown('<h2 style="color: #2E7D32; border-bottom: 2px solid #4CAF50; padding-bottom: 8px;">Upload Waste Image</h2>', unsafe_allow_html=True)
+# Check if a category is selected from the sidebar
+if st.session_state.selected_category and st.session_state.selected_category in waste_categories:
+    selected_category = st.session_state.selected_category
     
-    # Styled file uploader instruction
-    st.markdown('<p style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; border-left: 4px solid #4CAF50;">Please upload an image of waste material for classification.</p>', unsafe_allow_html=True)
+    st.markdown(f'<h2 style="color: #2E7D32; border-bottom: 2px solid #4CAF50; padding-bottom: 8px;">{selected_category}</h2>', unsafe_allow_html=True)
     
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        # Display category information
+        st.markdown(f'<h3 style="color: #2E7D32;">About {selected_category}</h3>', unsafe_allow_html=True)
+        st.markdown(f'<div style="background-color: white; padding: 15px; border-radius: 10px; border: 1px solid #e0e0e0;">{waste_categories[selected_category]["description"]}</div>', unsafe_allow_html=True)
+        
+        # Show characteristics
+        st.markdown(f'<h3 style="color: #2E7D32; margin-top: 20px;">Characteristics</h3>', unsafe_allow_html=True)
+        characteristics_html = '<div style="background-color: white; padding: 15px; border-radius: 10px; border: 1px solid #e0e0e0;">'
+        for char in waste_categories[selected_category]["characteristics"]:
+            characteristics_html += f'<div style="padding: 5px 10px; margin-bottom: 5px; background-color: #f1f8e9; border-radius: 5px;">✓ {char}</div>'
+        characteristics_html += '</div>'
+        st.markdown(characteristics_html, unsafe_allow_html=True)
+    
+    with col2:
+        # Display recycling instructions
+        st.markdown(f'<h3 style="color: #2E7D32;">Recycling Instructions</h3>', unsafe_allow_html=True)
+        instructions = get_recycling_instructions(selected_category)
+        st.markdown(f'<div style="background-color: white; padding: 15px; border-radius: 10px; border: 1px solid #e0e0e0;">{instructions}</div>', unsafe_allow_html=True)
+        
+        # Button to clear selection
+        st.markdown('<div style="display: flex; justify-content: center; margin: 20px 0;">', unsafe_allow_html=True)
+        if st.button("🔙 Back to Home"):
+            st.session_state.selected_category = None
+            st.experimental_set_query_params()
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+else:
+    # Regular upload interface when no category is selected
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        st.markdown('<h2 style="color: #2E7D32; border-bottom: 2px solid #4CAF50; padding-bottom: 8px;">Upload Waste Image</h2>', unsafe_allow_html=True)
+        
+        # Styled file uploader instruction
+        st.markdown('<p style="background-color: #f8f9fa; padding: 10px; border-radius: 5px; border-left: 4px solid #4CAF50;">Please upload an image of waste material for classification.</p>', unsafe_allow_html=True)
+        
+        uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
     
     if uploaded_file is not None:
         try:
