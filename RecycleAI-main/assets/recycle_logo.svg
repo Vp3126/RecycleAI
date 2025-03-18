@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <style>
+    .recycling-arrow { fill: #4CAF50; }
+    .recycling-circle { fill: none; stroke: #4CAF50; stroke-width: 3; }
+  </style>
+  
+  <!-- Circle around the recycling symbol -->
+  <circle class="recycling-circle" cx="50" cy="50" r="45" />
+  
+  <!-- Recycling symbol (three arrows in a triangle) -->
+  <path class="recycling-arrow" d="M50,28 L62,48 L38,48 Z" />
+  <path class="recycling-arrow" d="M68,63 L41,58 L55,37 Z" transform="rotate(120 50 50)" />
+  <path class="recycling-arrow" d="M32,63 L59,58 L45,37 Z" transform="rotate(240 50 50)" />
+</svg>
