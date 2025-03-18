@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 import os
 
+# Get the directory where app.py is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Page configuration must be the first Streamlit command
 st.set_page_config(
     page_title="Waste Classification System",
@@ -25,7 +28,8 @@ st.set_page_config(
 # Load CSS from file
 def load_css():
     try:
-        with open("style.css") as f:
+        css_path = os.path.join(SCRIPT_DIR, "style.css")
+        with open(css_path) as f:
             st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
     except Exception as e:
         st.warning(f"Could not load custom CSS: {str(e)}")
@@ -58,7 +62,8 @@ if 'category' in query_params:
 # Sidebar with error handling
 with st.sidebar:
     try:
-        st.image("assets/recycle_logo.svg", width=100)
+        logo_path = os.path.join(SCRIPT_DIR, "assets", "recycle_logo.svg")
+        st.image(logo_path, width=100)
     except:
         st.markdown("♻️")
 

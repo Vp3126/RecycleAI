@@ -12,10 +12,12 @@ def ensure_directory(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-# Create data directory
-ensure_directory("data")
+# Create data directory in the same directory as the script
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(SCRIPT_DIR, "data")
+ensure_directory(DATA_DIR)
 
-HISTORY_FILE = "classification_history.json"
+HISTORY_FILE = os.path.join(DATA_DIR, "classification_history.json")
 
 def save_classification_history(entry):
     """Save a classification entry to history file"""
@@ -39,18 +41,27 @@ def save_classification_history(entry):
             
     except Exception as e:
         print(f"Error saving history: {str(e)}")
+        st.error(f"Failed to save classification history: {str(e)}")
 
 def get_classification_history():
     """Load classification history from file"""
     try:
         if os.path.exists(HISTORY_FILE):
             with open(HISTORY_FILE, 'r') as f:
-                history = json.load(f)
-                # Convert base64 strings back to bytes for display
-                for entry in history:
-                    if "image" in entry:
-                        entry["image"] = base64.b64decode(entry["image"])
-                return history
+                try:
+                    history = json.load(f)
+                    # Convert base64 strings back to bytes for display
+                    for entry in history:
+                        if "image" in entry:
+                            try:
+                                entry["image"] = base64.b64decode(entry["image"])
+                            except:
+                                # If image conversion fails, remove the image
+                                del entry["image"]
+                    return history
+                except json.JSONDecodeError:
+                    # If JSON is invalid, return empty list
+                    return []
         return []
     except Exception as e:
         print(f"Error loading history: {str(e)}")
