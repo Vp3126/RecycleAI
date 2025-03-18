@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: recycleai
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run RecycleAI-main/app.py --server.port $PORT --server.address 0.0.0.0 --browser.serverAddress 0.0.0.0 --browser.serverPort $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.0
+      - key: STREAMLIT_SERVER_PORT
+        value: $PORT
+      - key: STREAMLIT_SERVER_ADDRESS
+        value: 0.0.0.0
+      - key: STREAMLIT_BROWSER_SERVER_ADDRESS
+        value: 0.0.0.0
+      - key: STREAMLIT_BROWSER_SERVER_PORT
+        value: $PORT 
