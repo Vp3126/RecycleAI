@@ -169,13 +169,52 @@ if history:
     st.markdown('<h2 style="color: #2E7D32; margin-top: 2rem;">Recent Classifications</h2>', unsafe_allow_html=True)
     
     if len(history) > 0:
-        df = pd.DataFrame(history)
+        # Create a copy of history without images for the dataframe
+        history_for_df = []
+        for entry in history:
+            entry_copy = {
+                'timestamp': entry['timestamp'],
+                'category': entry['category'],
+                'confidence': entry['confidence']
+            }
+            history_for_df.append(entry_copy)
+        
+        df = pd.DataFrame(history_for_df)
         df = df.sort_values('timestamp', ascending=False)
+        
+        # Style the dataframe
         st.dataframe(
-            df,
+            df.style.format({
+                'confidence': '{:.1f}%'
+            }).set_properties(**{
+                'background-color': '#f8f9fa',
+                'color': '#2E7D32',
+                'border-color': '#4CAF50'
+            }),
             use_container_width=True,
             height=300
         )
+        
+        # Display images in a separate section if available
+        images_available = any("image" in entry and entry["image"] is not None for entry in history)
+        if images_available:
+            st.markdown('<h3 style="color: #2E7D32; margin-top: 1rem;">Classification Images</h3>', unsafe_allow_html=True)
+            
+            # Display images in a grid
+            cols = st.columns(min(len(history), 3))
+            for col, entry in zip(cols, reversed(history[-3:])):  # Show last 3 entries
+                with col:
+                    try:
+                        if "image" in entry and entry["image"] is not None:
+                            img = Image.open(io.BytesIO(entry["image"]))
+                            st.image(img, use_container_width=True)
+                            st.markdown(f"""
+                            **Category:** {entry['category'].title()}  
+                            **Confidence:** {entry['confidence']:.1f}%  
+                            {entry['timestamp']}
+                            """)
+                    except Exception as e:
+                        print(f"Error displaying image: {str(e)}")
     else:
         st.info("No classification history available yet. Start classifying waste to see your history!")
 

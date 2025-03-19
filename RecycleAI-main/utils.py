@@ -22,15 +22,29 @@ HISTORY_FILE = os.path.join(DATA_DIR, "classification_history.json")
 def save_classification_history(entry):
     """Save a classification entry to history file"""
     try:
-        # Convert image bytes to base64 string
-        if "image" in entry:
-            entry["image"] = base64.b64encode(entry["image"]).decode('utf-8')
+        # Create a copy of the entry to modify
+        entry_to_save = entry.copy()
+        
+        # Convert image bytes to base64 string if it exists
+        if "image" in entry_to_save and entry_to_save["image"] is not None:
+            try:
+                entry_to_save["image"] = base64.b64encode(entry_to_save["image"]).decode('utf-8')
+            except Exception as e:
+                print(f"Error encoding image: {str(e)}")
+                # If image conversion fails, remove it from the entry
+                del entry_to_save["image"]
         
         # Load existing history
-        history = get_classification_history()
+        history = []
+        if os.path.exists(HISTORY_FILE):
+            try:
+                with open(HISTORY_FILE, 'r') as f:
+                    history = json.load(f)
+            except json.JSONDecodeError:
+                history = []
         
         # Add new entry
-        history.append(entry)
+        history.append(entry_to_save)
         
         # Keep only last 10 entries
         history = history[-10:]
@@ -52,7 +66,7 @@ def get_classification_history():
                     history = json.load(f)
                     # Convert base64 strings back to bytes for display
                     for entry in history:
-                        if "image" in entry:
+                        if "image" in entry and entry["image"] is not None:
                             try:
                                 entry["image"] = base64.b64decode(entry["image"])
                             except:

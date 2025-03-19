@@ -11,6 +11,9 @@ from torchvision import transforms
 # Define waste categories globally
 WASTE_CATEGORIES = ['cardboard', 'glass', 'metal', 'paper', 'plastic', 'trash']
 
+# Get the directory where model.py is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 class WasteClassifier:
     """
     A classifier that uses image features for waste classification
@@ -21,13 +24,10 @@ class WasteClassifier:
         self.model = self._create_model()
         # Load trained weights
         try:
-            self.load_weights('waste_model.pth')
-        except:
-            try:
-                self.load_weights('../waste_model.pth')
-            except Exception as e:
-                print(f"Error loading model weights: {str(e)}")
-                raise
+            self.load_weights(os.path.join(SCRIPT_DIR, 'waste_model.pth'))
+        except Exception as e:
+            print(f"Error loading model weights: {str(e)}")
+            raise
     
     def _create_model(self):
         # Load pre-trained ResNet50
@@ -41,6 +41,9 @@ class WasteClassifier:
     
     def load_weights(self, weights_path):
         """Load trained weights"""
+        if not os.path.exists(weights_path):
+            raise FileNotFoundError(f"Model weights not found at: {weights_path}")
+        print(f"Loading model weights from: {weights_path}")
         self.model.load_state_dict(torch.load(weights_path, map_location=self.device))
         self.model.eval()
     
@@ -67,14 +70,11 @@ class WasteClassifier:
 
 def load_model():
     try:
-        # Try loading from current directory first
-        model_path = "waste_model.pth"
-        if not os.path.exists(model_path):
-            # Try loading from parent directory
-            model_path = "../waste_model.pth"
+        # Get the absolute path to the model file
+        model_path = os.path.join(SCRIPT_DIR, "waste_model.pth")
         
         if not os.path.exists(model_path):
-            print(f"Model file not found at {model_path}")
+            print(f"Model file not found at: {model_path}")
             return None
             
         print(f"Loading model from: {model_path}")
