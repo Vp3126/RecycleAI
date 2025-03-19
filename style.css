@@ -1,0 +1,240 @@
+/* Main styles for Waste Classification App */
+
+/* Hide deploy button and other UI elements */
+.stDeployButton {display: none !important;}
+#MainMenu {visibility: hidden !important;}
+header {visibility: hidden !important;}
+footer {visibility: hidden !important;}
+.viewerBadge_container__1QSob {display: none !important;}
+div[data-testid="stToolbar"] {display: none !important;}
+
+/* Global text color */
+body, p, div, span, li, a, label {
+    color: inherit;
+}
+
+/* Sidebar styling */
+.sidebar .sidebar-content {
+    padding: 2rem 1rem;
+}
+
+/* Add hover effect to sidebar items */
+div[data-testid="stSidebarNav"] li {
+    transition: all 0.3s ease;
+    border-radius: 5px;
+    padding: 0.2rem;
+}
+
+div[data-testid="stSidebarNav"] li:hover {
+    background-color: rgba(76, 175, 80, 0.2);
+    transform: translateX(5px);
+}
+
+/* Button styling */
+.stButton>button {
+    width: 100%;
+    margin: 5px 0;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    transition: background-color 0.3s;
+}
+
+.stButton>button:hover {
+    background-color: #45a049;
+}
+
+/* Card styles */
+.classification-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 10px 0;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Progress bar styling */
+.stProgress .st-bo {
+    background-color: #4CAF50;
+}
+
+/* Header styling */
+h1, h2, h3 {
+    color: #2E7D32;
+}
+
+/* Info card styling */
+.info-card {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.info-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* File uploader styling */
+div[data-testid="stFileUploader"] {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 2px dashed #4CAF50;
+    transition: all 0.3s ease;
+}
+
+div[data-testid="stFileUploader"]:hover {
+    border-color: #2E7D32;
+    background-color: rgba(76, 175, 80, 0.05);
+}
+
+/* Success message styling */
+.stSuccess {
+    background-color: #dff0d8;
+    border: 1px solid #d6e9c6;
+    color: #3c763d !important;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+/* Error message styling */
+.stError {
+    background-color: #f2dede;
+    border: 1px solid #ebccd1;
+    color: #a94442 !important;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+/* Spinner styling */
+.stSpinner {
+    color: #4CAF50;
+}
+
+/* Dataframe styling */
+.dataframe {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+
+.dataframe th {
+    background-color: #4CAF50;
+    color: white !important;
+    padding: 10px;
+    text-align: left;
+}
+
+.dataframe td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    color: inherit;
+}
+
+/* Markdown container styling */
+div[data-testid="stMarkdownContainer"] {
+    color: inherit;
+}
+
+div[data-testid="stMarkdownContainer"] p {
+    color: inherit;
+}
+
+/* Text input styling */
+div[data-testid="stTextInput"] input {
+    color: inherit;
+}
+
+/* Select box styling */
+div[data-testid="stSelectbox"] {
+    color: inherit;
+}
+
+/* Radio buttons */
+div[data-testid="stRadio"] label {
+    color: inherit;
+}
+
+/* Checkbox */
+div[data-testid="stCheckbox"] label {
+    color: inherit;
+}
+
+/* Expander */
+div[data-testid="stExpander"] {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+div[data-testid="stExpander"] > div {
+    color: inherit;
+}
+
+/* Footer styling */
+.footer {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+    color: inherit;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 10px;
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #4CAF50;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+/* Remove forced text color */
+* {
+    color: inherit;
+}
+
+/* Exceptions for specific elements */
+button, .stButton>button {
+    color: white !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #4CAF50 !important;
+}
+
+.stSuccess {
+    color: #3c763d !important;
+}
+
+.stError {
+    color: #a94442 !important;
+}
+
+.dataframe th {
+    color: white !important;
+}
+
+/* Streamlit specific overrides */
+.st-emotion-cache-ue6h4q {
+    color: inherit;
+}
+
+.st-emotion-cache-1y4p8pa {
+    color: inherit;
+}

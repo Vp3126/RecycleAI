@@ -1,0 +1,85 @@
+Project Overview
+<p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 20px;">
+    The Waste Classification System is an AI-powered application that uses computer vision to identify different 
+    types of waste materials from images. The system aims to promote proper waste sorting and recycling practices 
+    by providing users with accurate classification and recycling guidance.
+</p>
+
+🔄 How It Works
+<ol style="padding-left: 25px;">
+    <li style="margin-bottom: 10px;"><strong>Image Upload</strong>: Users upload images of waste items they want to classify</li>
+    <li style="margin-bottom: 10px;"><strong>AI Processing</strong>: Our trained machine learning model analyzes the image to identify the waste type</li>
+    <li style="margin-bottom: 10px;"><strong>Classification</strong>: The system determines the category of waste (plastic, glass, metal, paper, organic, e-waste)</li>
+    <li style="margin-bottom: 10px;"><strong>Guidance</strong>: Based on the classification, appropriate recycling or disposal instructions are provided</li>
+</ol>
+
+🌍 Why It Matters
+<p style="font-size: 1.05rem; line-height: 1.5; margin-bottom: 15px;">
+    Improper waste disposal and recycling contribute significantly to environmental problems:
+</p>
+
+<ul style="list-style-type: none; padding-left: 5px;">
+    <li style="margin-bottom: 10px; display: flex; align-items: flex-start;">
+        <span style="color: #F44336; margin-right: 10px;">⚠️</span> Landfills reaching capacity and leaching harmful chemicals
+    </li>
+    <li style="margin-bottom: 10px; display: flex; align-items: flex-start;">
+        <span style="color: #F44336; margin-right: 10px;">⚠️</span> Ocean plastic pollution affecting marine life
+    </li>
+    <li style="margin-bottom: 10px; display: flex; align-items: flex-start;">
+        <span style="color: #F44336; margin-right: 10px;">⚠️</span> Valuable resources being wasted instead of recycled
+    </li>
+    <li style="margin-bottom: 10px; display: flex; align-items: flex-start;">
+        <span style="color: #F44336; margin-right: 10px;">⚠️</span> Increased carbon emissions from waste processing
+    </li>
+</ul>
+
+<p style="font-size: 1.05rem; line-height: 1.5; margin-top: 15px; font-style: italic; border-left: 3px solid #4CAF50; padding-left: 15px;">
+    By helping individuals correctly identify and properly dispose of waste, we can collectively make a positive environmental impact.
+</p>
+
+💻 Technology Stack
+<p style="font-size: 1.05rem; margin-bottom: 15px;">This application is built using:</p>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+    <div style="background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <p style="font-weight: bold; margin-bottom: 5px;">Streamlit</p>
+        <p style="font-size: 0.9rem; color: #666;">For the web application interface</p>
+    </div>
+    <div style="background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <p style="font-weight: bold; margin-bottom: 5px;">TensorFlow</p>
+        <p style="font-size: 0.9rem; color: #666;">For the AI image classification model</p>
+    </div>
+    <div style="background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <p style="font-weight: bold; margin-bottom: 5px;">Python</p>
+        <p style="font-size: 0.9rem; color: #666;">As the primary programming language</p>
+    </div>
+    <div style="background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <p style="font-weight: bold; margin-bottom: 5px;">OpenCV & Pillow</p>
+        <p style="font-size: 0.9rem; color: #666;">For image processing</p>
+    </div>
+    <div style="background-color: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <p style="font-weight: bold; margin-bottom: 5px;">Pandas</p>
+        <p style="font-size: 0.9rem; color: #666;">For data handling and analytics</p>
+    </div>
+</div>
+
+🚀 Future Enhancements
+<p style="font-size: 1.05rem; margin-bottom: 15px;">We plan to enhance the system with:</p>
+
+<ul style="list-style-type: none; padding-left: 5px;">
+    <li style="margin-bottom: 10px; display: flex; align-items: flex-start;">
+        <span style="color: #4CAF50; margin-right: 10px;">✅</span> Real-time waste classification using camera input
+    </li>
+    <li style="margin-bottom: 10px; display: flex; align-items: flex-start;">
+        <span style="color: #4CAF50; margin-right: 10px;">✅</span> Community features for collaborative learning
+    </li>
+    <li style="margin-bottom: 10px; display: flex; align-items: flex-start;">
+        <span style="color: #4CAF50; margin-right: 10px;">✅</span> Integration with local recycling facility information
+    </li>
+    <li style="margin-bottom: 10px; display: flex; align-items: flex-start;">
+        <span style="color: #4CAF50; margin-right: 10px;">✅</span> Expanded waste categories and subcategories
+    </li>
+    <li style="margin-bottom: 10px; display: flex; align-items: flex-start;">
+        <span style="color: #4CAF50; margin-right: 10px;">✅</span> Mobile application for on-the-go waste classification
+    </li>
+</ul>
