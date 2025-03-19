@@ -3,11 +3,7 @@ services:
     name: recycleai
     env: python
     buildCommand: pip install -r requirements.txt
-<<<<<<< HEAD
-    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --browser.serverAddress 0.0.0.0 --browser.serverPort $PORT
-=======
-    startCommand: cd RecycleAI-main && streamlit run app.py --server.port $PORT --server.address 0.0.0.0
->>>>>>> eddea27e80bfa0586940f7781dbd680cd3f24909
+    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.0
@@ -18,4 +14,8 @@ services:
       - key: STREAMLIT_BROWSER_SERVER_ADDRESS
         value: 0.0.0.0
       - key: STREAMLIT_BROWSER_SERVER_PORT
-        value: $PORT 
+        value: $PORT
+      - key: STREAMLIT_SERVER_ENABLE_CORS
+        value: "true"
+      - key: STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION
+        value: "false"
