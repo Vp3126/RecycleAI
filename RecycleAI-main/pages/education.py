@@ -71,26 +71,30 @@ for category, info in waste_categories.items():
     
     with col1:
         st.markdown("""
-        <div style='background-color: #f1f8e9; padding: 15px; border-radius: 8px; margin-bottom: 15px;'>
-            <h3 style='color: #2E7D32;'>Description</h3>
-            <p style='color: #333333;'>
+        <div style='background-color: #1b5e20; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+            <h3 style='color: white; margin-bottom: 10px; font-size: 22px;'>Description</h3>
+            <p style='color: white; font-size: 16px; line-height: 1.6;'>
         """, unsafe_allow_html=True)
         st.write(info["description"])
         st.markdown("</div>", unsafe_allow_html=True)
         
         st.markdown("""
-        <div style='background-color: #1b5e20; padding: 15px; border-radius: 8px;'>
-            <h3 style='color: white;'>Characteristics</h3>
+        <div style='background-color: #1b5e20; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+            <h3 style='color: white; margin-bottom: 20px; font-size: 24px; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);'>Characteristics</h3>
         """, unsafe_allow_html=True)
         for char in info["characteristics"]:
-            st.markdown(f"<p style='color: white; margin: 8px 0;'>✓ {char}</p>", unsafe_allow_html=True)
+            st.markdown(f"""
+                <div style='background-color: #2e7d32; margin: 12px 0; padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2);'>
+                    <p style='color: white; margin: 0; font-size: 18px; font-weight: 500; text-shadow: 1px 1px 1px rgba(0,0,0,0.1);'>✓ {char}</p>
+                </div>
+            """, unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
-        <div style='background-color: #f1f8e9; padding: 15px; border-radius: 8px;'>
-            <h3 style='color: #2E7D32;'>Recycling Instructions</h3>
-            <div style='color: #333333;'>
+        <div style='background-color: #1b5e20; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+            <h3 style='color: white; margin-bottom: 15px; font-size: 22px;'>Recycling Instructions</h3>
+            <div style='color: white; font-size: 16px; line-height: 1.6;'>
         """, unsafe_allow_html=True)
         st.markdown(info["recycling_instructions"])
         st.markdown("</div></div>", unsafe_allow_html=True)

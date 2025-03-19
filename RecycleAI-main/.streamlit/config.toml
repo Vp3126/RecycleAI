@@ -1,17 +1,9 @@
-[theme]
-primaryColor = "#4CAF50"
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F0F2F6"
-textColor = "#262730"
-font = "sans serif"
-
 [server]
-port = 8501
-address = "127.0.0.1"
-enableCORS = false
+port = $PORT
+enableCORS = true
+enableXsrfProtection = false
+address = "0.0.0.0"
 
 [browser]
-gatherUsageStats = false
-
-[ui]
-hideTopBar = true
+serverAddress = "0.0.0.0"
+serverPort = $PORT

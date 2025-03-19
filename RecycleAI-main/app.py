@@ -139,18 +139,28 @@ def get_model():
     try:
         # Get the absolute path to the model file
         model_path = os.path.join(SCRIPT_DIR, "waste_model.pth")
+        print(f"Looking for model at: {model_path}")  # Debug print
+        
         if not os.path.exists(model_path):
-            st.error(f"Model file not found at: {model_path}")
-            return None
+            print(f"Model not found at {model_path}")  # Debug print
+            # Try one directory up
+            parent_model_path = os.path.join(os.path.dirname(SCRIPT_DIR), "waste_model.pth")
+            print(f"Trying parent directory: {parent_model_path}")  # Debug print
             
-        print(f"Attempting to load model from: {model_path}")
-        model = load_model()
+            if os.path.exists(parent_model_path):
+                model_path = parent_model_path
+            else:
+                st.error(f"Model file not found in either location")
+                return None
+            
+        print(f"Loading model from: {model_path}")  # Debug print
+        model = load_model(model_path)  # Pass the model path explicitly
         
         if model is None:
             st.error("Failed to load model. Please check if waste_model.pth exists and is valid.")
             return None
             
-        print("Model loaded successfully!")
+        print("Model loaded successfully!")  # Debug print
         return model
     except Exception as e:
         st.error(f"Error loading model: {str(e)}")
@@ -200,12 +210,43 @@ else:
     
     with col1:
         st.markdown("""
-            <div style='background-color: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
-                <h2 style='color: #2E7D32; border-bottom: 2px solid #4CAF50; padding-bottom: 8px;'>Upload Waste Image</h2>
-                <p style='background-color: #f8f9fa; padding: 10px; border-radius: 5px; border-left: 4px solid #4CAF50; margin: 20px 0; color: #2E7D32; font-weight: 500;'>
+            <div style='background-color: #1b5e20; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
+                <h2 style='color: white; border-bottom: 2px solid #4CAF50; padding-bottom: 8px;'>Upload Waste Image</h2>
+                <p style='background-color: #2e7d32; padding: 15px; border-radius: 5px; border-left: 4px solid #4CAF50; margin: 20px 0; color: white; font-size: 16px; font-weight: 500;'>
                     Please upload an image of waste material for classification.
                 </p>
             </div>
+        """, unsafe_allow_html=True)
+        
+        # Custom CSS for file uploader
+        st.markdown("""
+            <style>
+                .stFileUploader div:first-child {
+                    background-color: #2e7d32 !important;
+                    border-color: #4CAF50 !important;
+                }
+                .stFileUploader div:first-child:hover {
+                    background-color: #1b5e20 !important;
+                    border-color: #81c784 !important;
+                }
+                .stFileUploader button {
+                    background-color: #4CAF50 !important;
+                    color: white !important;
+                    border: none !important;
+                    padding: 8px 15px !important;
+                    font-weight: 500 !important;
+                }
+                .stFileUploader button:hover {
+                    background-color: #45a049 !important;
+                }
+                .stFileUploader p {
+                    color: white !important;
+                    font-size: 16px !important;
+                }
+                .uploadedFileName {
+                    color: white !important;
+                }
+            </style>
         """, unsafe_allow_html=True)
         
         uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
@@ -215,19 +256,19 @@ else:
                 # Open and convert image to RGB
                 image = Image.open(uploaded_file).convert('RGB')
                 
-                # Display the image
-                st.image(image, caption="Uploaded Image", use_container_width=True)
+                # Display the image with width parameter instead of use_container_width
+                st.image(image, caption="Uploaded Image", width=None)  # width=None will use full container width
                 
                 if st.button("🔍 Classify Waste", use_container_width=True):
                     with st.spinner("🔄 Processing image..."):
                         # Preprocess the image
-                        img_array = preprocess_image(image)
+                        img_tensor = preprocess_image(image)
                         
-                        if img_array is None:
+                        if img_tensor is None:
                             st.error("Failed to preprocess image. Please try another image.")
                         else:
                             # Get prediction
-                            prediction, confidence = predict_waste_class(st.session_state.model, img_array)
+                            prediction, confidence = predict_waste_class(st.session_state.model, img_tensor)
                             
                             if prediction is None:
                                 st.error("Failed to classify image. Please try another image.")
@@ -259,7 +300,9 @@ else:
                                     **Confidence:** {confidence:.1f}%
                                     """)
                                     
-                                    st.progress(confidence / 100)
+                                    # Convert numpy float32 to regular Python float
+                                    progress_value = float(confidence) / 100.0
+                                    st.progress(progress_value)
                                     
                                     st.subheader("Recycling Instructions")
                                     st.markdown(get_recycling_instructions(prediction))
@@ -282,7 +325,7 @@ if st.session_state.history:
         with col:
             try:
                 img = Image.open(io.BytesIO(entry["image"]))
-                st.image(img, use_container_width=True)
+                st.image(img, width=None)  # width=None will use full container width
                 st.markdown(f"""
                 **Category:** {entry['category'].title()}  
                 **Confidence:** {entry['confidence']:.1f}%  
