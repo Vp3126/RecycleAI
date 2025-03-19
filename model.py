@@ -19,15 +19,9 @@ class WasteClassifier:
     A classifier that uses image features for waste classification
     """
     def __init__(self):
-        self.categories = ['cardboard', 'glass', 'metal', 'paper', 'plastic', 'trash']
+        self.categories = WASTE_CATEGORIES
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = self._create_model()
-        # Load trained weights
-        try:
-            self.load_weights(os.path.join(SCRIPT_DIR, 'waste_model.pth'))
-        except Exception as e:
-            print(f"Error loading model weights: {str(e)}")
-            raise
     
     def _create_model(self):
         # Load pre-trained ResNet50
@@ -44,57 +38,52 @@ class WasteClassifier:
         if not os.path.exists(weights_path):
             raise FileNotFoundError(f"Model weights not found at: {weights_path}")
         print(f"Loading model weights from: {weights_path}")
-        self.model.load_state_dict(torch.load(weights_path, map_location=self.device))
+        state_dict = torch.load(weights_path, map_location=self.device)
+        self.model.load_state_dict(state_dict)
         self.model.eval()
     
-    def predict(self, image_array):
+    def predict(self, image_tensor):
         """Predict using the deep learning model"""
-        # Convert numpy array to tensor
-        if isinstance(image_array, np.ndarray):
-            image_array = torch.from_numpy(image_array).float()
-        
-        # Add batch dimension if not present
-        if len(image_array.shape) == 3:
-            image_array = image_array.unsqueeze(0)
-        
-        # Move to device
-        image_array = image_array.to(self.device)
-        
-        # Get prediction
-        with torch.no_grad():
-            outputs = self.model(image_array)
-            probabilities = torch.softmax(outputs, dim=1)
-            probabilities = probabilities.cpu().numpy()[0]
-        
-        return probabilities
+        try:
+            # Move to device
+            image_tensor = image_tensor.to(self.device)
+            
+            # Get prediction
+            with torch.no_grad():
+                outputs = self.model(image_tensor)
+                probabilities = torch.softmax(outputs, dim=1)
+                probabilities = probabilities.cpu().numpy()[0]
+            
+            return probabilities
+        except Exception as e:
+            print(f"Error in model prediction: {str(e)}")
+            return None
 
-def load_model():
+def load_model(model_path=None):
+    """
+    Load the waste classification model
+    Args:
+        model_path: Optional path to the model weights file. If not provided, will look in default locations.
+    Returns:
+        WasteClassifier instance or None if loading fails
+    """
     try:
-        # Get the absolute path to the model file
-        model_path = os.path.join(SCRIPT_DIR, "waste_model.pth")
+        if model_path is None:
+            # Try default locations
+            model_path = os.path.join(SCRIPT_DIR, 'waste_model.pth')
+            if not os.path.exists(model_path):
+                # Try one directory up
+                model_path = os.path.join(os.path.dirname(SCRIPT_DIR), 'waste_model.pth')
         
+        print(f"Attempting to load model from: {model_path}")
         if not os.path.exists(model_path):
             print(f"Model file not found at: {model_path}")
             return None
             
-        print(f"Loading model from: {model_path}")
-        
-        # Load the model with pretrained weights for better feature extraction
-        model = models.resnet50(pretrained=True)
-        num_classes = len(WASTE_CATEGORIES)
-        model.fc = nn.Linear(model.fc.in_features, num_classes)
-        
-        # Load state dict
-        state_dict = torch.load(model_path, map_location=torch.device('cpu'))
-        print("Model state dict keys:", state_dict.keys())
-        
-        # Load weights
-        model.load_state_dict(state_dict)
-        
-        # Set model to evaluation mode
-        model.eval()
-        
-        return model
+        classifier = WasteClassifier()
+        classifier.load_weights(model_path)
+        print("Model loaded successfully!")
+        return classifier
     except Exception as e:
         print(f"Error loading model: {str(e)}")
         return None
@@ -105,10 +94,10 @@ def preprocess_image(image):
         if image.mode != 'RGB':
             image = image.convert('RGB')
         
-        # Define the preprocessing transforms with data augmentation
+        # Define the preprocessing transforms
         preprocess = transforms.Compose([
-            transforms.Resize((256, 256)),  # Resize to larger size first
-            transforms.CenterCrop(224),     # Center crop to final size
+            transforms.Resize((256, 256)),
+            transforms.CenterCrop(224),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
         ])
@@ -127,59 +116,63 @@ def preprocess_image(image):
 def predict_waste_class(model, image_tensor):
     try:
         if model is None or image_tensor is None:
+            print("Model or image tensor is None")
             return None, 0.0
             
-        with torch.no_grad():
-            outputs = model(image_tensor)
-            probabilities = torch.nn.functional.softmax(outputs, dim=1)
+        # Get probabilities from model
+        probabilities = model.predict(image_tensor)
+        if probabilities is None:
+            print("Failed to get probabilities from model")
+            return None, 0.0
             
-            # Get top 3 predictions for debugging
-            top3_prob, top3_indices = torch.topk(probabilities, 3)
-            
-            # Print top 3 predictions for debugging
-            print("\nTop 3 predictions:")
-            for i in range(3):
-                idx = top3_indices[0][i].item()
-                prob = top3_prob[0][i].item() * 100
-                print(f"{WASTE_CATEGORIES[idx]}: {prob:.2f}%")
-            
-            # Get the highest probability prediction
-            confidence, predicted = torch.max(probabilities, 1)
-            confidence = confidence.item() * 100
-            predicted_category = WASTE_CATEGORIES[predicted.item()]
-            
-            # Special handling for plastic items
-            plastic_idx = WASTE_CATEGORIES.index('plastic')
-            paper_idx = WASTE_CATEGORIES.index('paper')
-            
-            # If the prediction is paper and plastic is in top 2 with decent confidence
-            if predicted_category == 'paper' and confidence < 70:  # Increased threshold
-                # Check if plastic is in top 2 predictions
-                for i in range(2):
-                    if top3_indices[0][i].item() == plastic_idx:
-                        plastic_prob = top3_prob[0][i].item() * 100
-                        if plastic_prob > 35:  # Increased threshold for plastic confidence
-                            predicted_category = 'plastic'
-                            confidence = plastic_prob
-                            break
-            
-            # If confidence is too low, try to use the second best prediction
-            elif confidence < 45 and top3_prob[0][1].item() * 100 > 35:  # Adjusted thresholds
-                # If the second best prediction is glass or plastic, use it
-                second_best_idx = top3_indices[0][1].item()
-                second_best_category = WASTE_CATEGORIES[second_best_idx]
-                if second_best_category in ['glass', 'plastic']:
-                    predicted_category = second_best_category
-                    confidence = top3_prob[0][1].item() * 100
-            
-            # Additional check for plastic items
-            if predicted_category == 'paper' and confidence < 80:  # Very high threshold for paper
-                plastic_prob = probabilities[0][plastic_idx].item() * 100
-                if plastic_prob > 40:  # If plastic has significant confidence
-                    predicted_category = 'plastic'
-                    confidence = plastic_prob
-            
-            return predicted_category, confidence
+        # Get top 3 predictions for debugging
+        top3_indices = np.argsort(probabilities)[-3:][::-1]
+        top3_probabilities = probabilities[top3_indices]
+        
+        # Print top 3 predictions for debugging
+        print("\nTop 3 predictions:")
+        for i in range(3):
+            idx = top3_indices[i]
+            prob = top3_probabilities[i] * 100
+            print(f"{WASTE_CATEGORIES[idx]}: {prob:.2f}%")
+        
+        # Get the highest probability prediction
+        predicted_idx = np.argmax(probabilities)
+        confidence = probabilities[predicted_idx] * 100
+        predicted_category = WASTE_CATEGORIES[predicted_idx]
+        
+        # Special handling for plastic items
+        plastic_idx = WASTE_CATEGORIES.index('plastic')
+        paper_idx = WASTE_CATEGORIES.index('paper')
+        
+        # If the prediction is paper and plastic is in top 2 with decent confidence
+        if predicted_category == 'paper' and confidence < 70:
+            # Check if plastic is in top 2 predictions
+            for i in range(2):
+                if top3_indices[i] == plastic_idx:
+                    plastic_prob = top3_probabilities[i] * 100
+                    if plastic_prob > 35:
+                        predicted_category = 'plastic'
+                        confidence = plastic_prob
+                        break
+        
+        # If confidence is too low, try to use the second best prediction
+        elif confidence < 45 and top3_probabilities[1] * 100 > 35:
+            # If the second best prediction is glass or plastic, use it
+            second_best_idx = top3_indices[1]
+            second_best_category = WASTE_CATEGORIES[second_best_idx]
+            if second_best_category in ['glass', 'plastic']:
+                predicted_category = second_best_category
+                confidence = top3_probabilities[1] * 100
+        
+        # Additional check for plastic items
+        if predicted_category == 'paper' and confidence < 80:
+            plastic_prob = probabilities[plastic_idx] * 100
+            if plastic_prob > 40:
+                predicted_category = 'plastic'
+                confidence = plastic_prob
+        
+        return predicted_category, confidence
     except Exception as e:
         print(f"Error predicting waste class: {str(e)}")
         return None, 0.0
