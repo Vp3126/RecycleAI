@@ -3,7 +3,7 @@ services:
     name: recycleai
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.enableCORS true --server.enableXsrfProtection false --server.maxUploadSize 200
+    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.enableCORS true --server.enableXsrfProtection true --server.maxUploadSize 200
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.0
@@ -18,7 +18,7 @@ services:
       - key: STREAMLIT_SERVER_ENABLE_CORS
         value: "true"
       - key: STREAMLIT_SERVER_ENABLE_XSRF_PROTECTION
-        value: "false"
+        value: "true"
       - key: STREAMLIT_SERVER_MAX_UPLOAD_SIZE
         value: "200"
       - key: STREAMLIT_BROWSER_GATHER_USAGE_STATS
