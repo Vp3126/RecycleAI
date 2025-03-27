@@ -1,9 +1,9 @@
 [server]
-
-address = "localhost"
-port = 8504
+address = "0.0.0.0"
+port = 10000
 enableCORS = true
 enableXsrfProtection = false
 
 [browser]
-serverPort = 8504
+serverAddress = "0.0.0.0"
+serverPort = 10000
