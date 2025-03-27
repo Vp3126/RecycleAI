@@ -60,20 +60,19 @@ class WasteClassifier:
             return None
 
 def load_model(model_path=None):
-    """
-    Load the waste classification model
-    Args:
-        model_path: Optional path to the model weights file. If not provided, will look in default locations.
-    Returns:
-        WasteClassifier instance or None if loading fails
-    """
     try:
         if model_path is None:
-            # Try default locations
-            model_path = os.path.join(SCRIPT_DIR, 'waste_model.pth')
-            if not os.path.exists(model_path):
-                # Try one directory up
-                model_path = os.path.join(os.path.dirname(SCRIPT_DIR), 'waste_model.pth')
+            # Check multiple possible model file names
+            possible_paths = [
+                os.path.join(SCRIPT_DIR, 'garbage-classification.zip'),
+                os.path.join(SCRIPT_DIR, 'waste_model.pth'),
+                os.path.join(SCRIPT_DIR, 'model.pth')
+            ]
+            
+            for path in possible_paths:
+                if os.path.exists(path):
+                    model_path = path
+                    break
         
         print(f"Attempting to load model from: {model_path}")
         if not os.path.exists(model_path):
@@ -81,11 +80,31 @@ def load_model(model_path=None):
             return None
             
         classifier = WasteClassifier()
-        classifier.load_weights(model_path)
-        print("Model loaded successfully!")
-        return classifier
+        
+        try:
+            # First try loading as state dict
+            state_dict = torch.load(model_path, map_location=torch.device('cpu'))
+            if isinstance(state_dict, dict):
+                if 'state_dict' in state_dict:
+                    # If it's a dictionary containing state_dict
+                    classifier.model.load_state_dict(state_dict['state_dict'])
+                else:
+                    # If it's the state dict itself
+                    classifier.model.load_state_dict(state_dict)
+            else:
+                # If it's the full model
+                classifier.model = state_dict
+                
+            classifier.model.eval()
+            print("Model loaded successfully!")
+            return classifier
+            
+        except Exception as e:
+            print(f"Error loading model: {str(e)}")
+            return None
+            
     except Exception as e:
-        print(f"Error loading model: {str(e)}")
+        print(f"Error in load_model: {str(e)}")
         return None
 
 def preprocess_image(image):

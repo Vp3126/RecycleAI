@@ -1,8 +1,9 @@
 [server]
+
+address = "localhost"
+port = 8504
 enableCORS = true
 enableXsrfProtection = false
-serverAddress = "0.0.0.0"
 
 [browser]
-serverAddress = "0.0.0.0"
-serverPort = $PORT 
+serverPort = 8504

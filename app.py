@@ -58,7 +58,7 @@ except Exception as e:
 
 # Initialize session state variables
 if 'history' not in st.session_state:
-    st.session_state.history = []
+    st.session_state.history = get_classification_history()  # Load history from file
 if 'model' not in st.session_state:
     st.session_state.model = None
 if 'selected_category' not in st.session_state:
@@ -107,17 +107,17 @@ with st.sidebar:
 
     # Sidebar
     st.sidebar.markdown("""
-        <div>
-            <h2 style='color: #4CAF50;'>🔄 Recent Classifications</h2>
+        <div style='background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>
+            <h2 style='color: #4CAF50; margin-bottom: 15px;'>🔄 Recent Classifications</h2>
         </div>
     """, unsafe_allow_html=True)
     
     if len(st.session_state.history) > 0:
         for entry in reversed(st.session_state.history[-5:]):  # Show last 5 entries
             st.sidebar.markdown(f"""
-                <div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #4CAF50;'>
-                    <p style='margin: 0;'><strong>Category:</strong> {entry["category"].title()}</p>
-                    <p style='margin: 5px 0 0 0; font-size: 0.9em;'>{entry["timestamp"]}</p>
+                <div style='background-color: #ffffff; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #4CAF50; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>
+                    <p style='margin: 0; color: #333;'><strong>Category:</strong> {entry["category"].title()}</p>
+                    <p style='margin: 5px 0 0 0; font-size: 0.9em; color: #666;'>{entry["timestamp"]}</p>
                     <div style='margin-top: 10px;'>
                         <div style='background-color: #4CAF50; height: 4px; width: {entry["confidence"]}%; border-radius: 2px;'></div>
                     </div>
@@ -125,46 +125,40 @@ with st.sidebar:
             """, unsafe_allow_html=True)
     else:
         st.sidebar.markdown("""
-            <div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px;'>
-                No classifications yet. Upload an image to get started!
+            <div style='background-color: #ffffff; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);'>
+                <p style='color: #666; margin: 0;'>No classifications yet. Upload an image to get started!</p>
             </div>
         """, unsafe_allow_html=True)
 
 # App title
 st.title("♻️ Waste Classification System")
 
+# Add file uploader
+col1, col2 = st.columns([1, 1])
+with col1:
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+
 # Load model with error handling
 @st.cache_resource
 def get_model():
     try:
-        # Get the absolute path to the model file
-        model_path = os.path.join(SCRIPT_DIR, "waste_model.pth")
-        print(f"Looking for model at: {model_path}")  # Debug print
+        # Look for model in the main directory
+        model_files = ['garbage-classification.zip', 'waste_model.pth', 'model.pth']
+        for file in model_files:
+            model_path = os.path.join(SCRIPT_DIR, file)
+            if os.path.exists(model_path):
+                print(f"Found model at: {model_path}")
+                model = load_model(model_path)
+                if model is not None:
+                    return model
         
-        if not os.path.exists(model_path):
-            print(f"Model not found at {model_path}")  # Debug print
-            # Try one directory up
-            parent_model_path = os.path.join(os.path.dirname(SCRIPT_DIR), "waste_model.pth")
-            print(f"Trying parent directory: {parent_model_path}")  # Debug print
+        # If no model found
+        st.error("Please ensure one of these files exists in the project directory: garbage-classification.zip, waste_model.pth, or model.pth")
+        return None
             
-            if os.path.exists(parent_model_path):
-                model_path = parent_model_path
-            else:
-                st.error(f"Model file not found in either location")
-                return None
-            
-        print(f"Loading model from: {model_path}")  # Debug print
-        model = load_model(model_path)  # Pass the model path explicitly
-        
-        if model is None:
-            st.error("Failed to load model. Please check if waste_model.pth exists and is valid.")
-            return None
-            
-        print("Model loaded successfully!")  # Debug print
-        return model
     except Exception as e:
         st.error(f"Error loading model: {str(e)}")
-        print(f"Detailed error: {str(e)}")  # For debugging
+        print(f"Detailed error: {str(e)}")
         return None
 
 # Try to load the model
@@ -178,142 +172,68 @@ except Exception as e:
     st.error(f"Error loading model: {str(e)}")
     print(f"Detailed error: {str(e)}")  # For debugging
 
-# Main content
-if st.session_state.selected_category and st.session_state.selected_category in waste_categories:
-    selected_category = st.session_state.selected_category
-    category_data = waste_categories[selected_category]
-    
-    st.header(f"{selected_category.title()} Waste")
-    
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        st.subheader("About")
-        st.write(category_data["description"])
+# In the image processing section:
+if uploaded_file is not None:
+    try:
+        image = Image.open(uploaded_file).convert('RGB')
+        st.image(image, caption="Uploaded Image", use_container_width=True)  # Updated parameter
         
-        st.subheader("Key Characteristics")
-        for char in category_data["characteristics"]:
-            st.markdown(f"✓ {char}")
-    
-    with col2:
-        st.subheader("Recycling Instructions")
-        st.markdown(category_data["recycling_instructions"])
-        
-        st.markdown("---")
-        if st.button("🔙 Back to Home", use_container_width=True):
-            st.session_state.selected_category = None
-            st.rerun()
-
-else:
-    # Regular upload interface
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        st.markdown("""
-            <div style='background-color: #1b5e20; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);'>
-                <h2 style='color: white; border-bottom: 2px solid #4CAF50; padding-bottom: 8px;'>Upload Waste Image</h2>
-                <p style='background-color: #2e7d32; padding: 15px; border-radius: 5px; border-left: 4px solid #4CAF50; margin: 20px 0; color: white; font-size: 16px; font-weight: 500;'>
-                    Please upload an image of waste material for classification.
-                </p>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        # Custom CSS for file uploader
-        st.markdown("""
-            <style>
-                .stFileUploader div:first-child {
-                    background-color: #2e7d32 !important;
-                    border-color: #4CAF50 !important;
-                }
-                .stFileUploader div:first-child:hover {
-                    background-color: #1b5e20 !important;
-                    border-color: #81c784 !important;
-                }
-                .stFileUploader button {
-                    background-color: #4CAF50 !important;
-                    color: white !important;
-                    border: none !important;
-                    padding: 8px 15px !important;
-                    font-weight: 500 !important;
-                }
-                .stFileUploader button:hover {
-                    background-color: #45a049 !important;
-                }
-                .stFileUploader p {
-                    color: white !important;
-                    font-size: 16px !important;
-                }
-                .uploadedFileName {
-                    color: white !important;
-                }
-            </style>
-        """, unsafe_allow_html=True)
-        
-        uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
-        
-        if uploaded_file is not None:
-            try:
-                # Open and convert image to RGB
-                image = Image.open(uploaded_file).convert('RGB')
-                
-                # Display the image with width parameter instead of use_container_width
-                st.image(image, caption="Uploaded Image", width=None)  # width=None will use full container width
-                
-                if st.button("🔍 Classify Waste", use_container_width=True):
-                    with st.spinner("🔄 Processing image..."):
-                        # Preprocess the image
-                        img_tensor = preprocess_image(image)
+        if st.button("🔍 Classify Waste", use_container_width=True):
+            if st.session_state.model is None:
+                st.error("Model not loaded. Please check model file exists.")
+            else:
+                with st.spinner("🔄 Processing image..."):
+                    img_tensor = preprocess_image(image)
+                    if img_tensor is None:
+                        st.error("Failed to preprocess image. Please try another image.")
+                    else:
+                        # Get prediction
+                        prediction, confidence = predict_waste_class(st.session_state.model, img_tensor)
                         
-                        if img_tensor is None:
-                            st.error("Failed to preprocess image. Please try another image.")
+                        if prediction is None:
+                            st.error("Failed to classify image. Please try another image.")
                         else:
-                            # Get prediction
-                            prediction, confidence = predict_waste_class(st.session_state.model, img_tensor)
+                            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            history_entry = {
+                                "timestamp": timestamp,
+                                "category": prediction,
+                                "confidence": float(confidence)
+                            }
                             
-                            if prediction is None:
-                                st.error("Failed to classify image. Please try another image.")
-                            else:
-                                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                                history_entry = {
-                                    "timestamp": timestamp,
-                                    "category": prediction,
-                                    "confidence": float(confidence)
-                                }
+                            # Add image data if available
+                            if uploaded_file:
+                                try:
+                                    history_entry["image"] = uploaded_file.getvalue()
+                                    uploaded_file.seek(0)  # Reset file pointer for displaying
+                                except Exception as e:
+                                    print(f"Error reading image data: {str(e)}")
+                            
+                            st.session_state.history.append(history_entry)
+                            save_classification_history(history_entry)
+                            
+                            with col2:
+                                st.success("✅ Classification complete!")
+                                st.subheader("Results")
                                 
-                                # Add image data if available
-                                if uploaded_file:
-                                    try:
-                                        history_entry["image"] = uploaded_file.getvalue()
-                                        uploaded_file.seek(0)  # Reset file pointer for displaying
-                                    except Exception as e:
-                                        print(f"Error reading image data: {str(e)}")
+                                st.markdown(f"""
+                                **Category:** {prediction.title()}  
+                                **Confidence:** {confidence:.1f}%
+                                """)
                                 
-                                st.session_state.history.append(history_entry)
-                                save_classification_history(history_entry)
+                                # Convert numpy float32 to regular Python float
+                                progress_value = float(confidence) / 100.0
+                                st.progress(progress_value)
                                 
-                                with col2:
-                                    st.success("✅ Classification complete!")
-                                    st.subheader("Results")
-                                    
-                                    st.markdown(f"""
-                                    **Category:** {prediction.title()}  
-                                    **Confidence:** {confidence:.1f}%
-                                    """)
-                                    
-                                    # Convert numpy float32 to regular Python float
-                                    progress_value = float(confidence) / 100.0
-                                    st.progress(progress_value)
-                                    
-                                    st.subheader("Recycling Instructions")
-                                    st.markdown(get_recycling_instructions(prediction))
-                                    
-                                    st.subheader("Characteristics")
-                                    for char in waste_categories[prediction]["characteristics"]:
-                                        st.markdown(f"✓ {char}")
+                                st.subheader("Recycling Instructions")
+                                st.markdown(get_recycling_instructions(prediction))
+                                
+                                st.subheader("Characteristics")
+                                for char in waste_categories[prediction]["characteristics"]:
+                                    st.markdown(f"✓ {char}")
 
-            except Exception as e:
-                st.error(f"Error processing image: {str(e)}")
-                print(f"Detailed error: {str(e)}")  # For debugging
+    except Exception as e:
+        st.error(f"Error processing image: {str(e)}")
+        print(f"Detailed error: {str(e)}")  # For debugging
 
 # Recent classifications
 if st.session_state.history:
